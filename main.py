@@ -1,6 +1,5 @@
 import tempfile
 import dataclasses
-from datetime import date
 
 from dotenv import load_dotenv
 from marker.converters.pdf import PdfConverter
@@ -35,9 +34,18 @@ class Medication:
     dosage: str
 
 @dataclasses.dataclass
+class Allergy:
+    name: str
+
+@dataclasses.dataclass
+class Surgery:
+    name: str
+    date: str
+
+@dataclasses.dataclass
 class Patient:
     name: str
-    dob: date
+    dob: str
     gender: str
     preferred_pronouns: str
     address: str
@@ -53,12 +61,12 @@ class Patient:
     symptoms_duration: str
     past_conditions: cocoindex.typing.List[Condition]
     current_medications: cocoindex.typing.List[Medication]
-    allergies: cocoindex.typing.List[str]
-    surgeries: cocoindex.typing.List[str]
+    allergies: cocoindex.typing.List[Allergy]
+    surgeries: cocoindex.typing.List[Surgery]
     occupation: str | None
     pharmacy: Contact | None
     consent_given: bool
-    consent_date: date
+    consent_date: str | None
 
 # @dataclasses.dataclass
 # class PatientSummary:

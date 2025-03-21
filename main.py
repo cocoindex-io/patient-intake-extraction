@@ -68,13 +68,6 @@ class Patient:
     consent_given: bool
     consent_date: str | None
 
-# @dataclasses.dataclass
-# class PatientSummary:
-#     """Summary info about a patient."""
-#     name: str
-#     age: int
-#     num_conditions: int
-#     num_medications: int
 
 class PdfToMarkdown(cocoindex.op.FunctionSpec):
     """Convert a PDF to markdown."""
@@ -97,19 +90,7 @@ class PdfToMarkdownExecutor:
             text, _, _ = text_from_rendered(self._converter(temp_file.name))
             return text
 
-# @cocoindex.op.function()
-# def summarize_patient(patient: Patient) -> PatientSummary:
-#     """Summarize a patient record."""
-#     # Calculate age from date of birth
-#     today = date.today()
-#     age = today.year - patient.dob.year - ((today.month, today.day) < (patient.dob.month, patient.dob.day))
-    
-#     return PatientSummary(
-#         name=patient.name,
-#         age=age,
-#         num_conditions=len(patient.past_conditions),
-#         num_medications=len(patient.current_medications),
-#     )
+
 
 @cocoindex.flow_def(name="PatientIntakeExtraction")
 def patient_intake_extraction_flow(flow_builder: cocoindex.FlowBuilder, data_scope: cocoindex.DataScope):
@@ -133,11 +114,9 @@ def patient_intake_extraction_flow(flow_builder: cocoindex.FlowBuilder, data_sco
                 #       api_type=cocoindex.LlmApiType.OPENAI, model="gpt-4o"),
                 output_type=Patient,
                 instruction="Please extract patient information from the intake form."))
-        # doc["patient_summary"] = doc["patient_info"].transform(summarize_patient)
         patients_index.collect(
             filename=doc["filename"],
             patient_info=doc["patient_info"],
-            # patient_summary=doc["patient_summary"],
         )
 
     patients_index.export(

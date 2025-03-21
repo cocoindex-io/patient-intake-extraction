@@ -38,3 +38,10 @@ Run query:
 ```bash
 python main.py
 ```
+
+Run with CocoInsight:
+```bash
+python3 main.py cocoindex server -c https://cocoindex.io
+```
+
+View results at https://cocoindex.io/cocoinsight

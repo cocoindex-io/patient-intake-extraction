@@ -1,6 +1,6 @@
 [project]
-name = "code-embedding"
+name = "patient-intake-extraction"
 version = "0.1.0"
-description = "Simple example for cocoindex: build embedding index based on source code."
+description = "Extract structured information from patient intake forms using LLM."
 requires-python = ">=3.10"
 dependencies = ["cocoindex>=0.1.11", "python-dotenv>=1.0.1"]

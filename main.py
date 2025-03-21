@@ -43,15 +43,18 @@ class Surgery:
     date: str
 
 @dataclasses.dataclass
+class Address:
+    street: str
+    city: str
+    state: str
+    zip_code: str
+
+@dataclasses.dataclass
 class Patient:
     name: str
     dob: str
     gender: str
-    preferred_pronouns: str
-    address: str
-    city: str
-    state: str
-    zip_code: str
+    address: Address
     phone: str
     email: str
     preferred_contact_method: str

@@ -3,10 +3,7 @@ import dataclasses
 import os
 
 from dotenv import load_dotenv
-from marker.converters.pdf import PdfConverter
-from marker.models import create_model_dict
-from marker.output import text_from_rendered
-from marker.config.parser import ConfigParser
+from markitdown import MarkItDown
 
 import cocoindex
 
@@ -73,27 +70,26 @@ class Patient:
     consent_date: str | None
 
 
-class PdfToMarkdown(cocoindex.op.FunctionSpec):
-    """Convert a PDF to markdown."""
+class ToMarkdown(cocoindex.op.FunctionSpec):
+    """Convert a document to markdown."""
 
 @cocoindex.op.executor_class(gpu=True, cache=True, behavior_version=1)
-class PdfToMarkdownExecutor:
-    """Executor for PdfToMarkdown."""
+class ToMarkdownExecutor:
+    """Executor for ToMarkdown."""
 
-    spec: PdfToMarkdown
-    _converter: PdfConverter
+    spec: ToMarkdown
+    _converter: MarkItDown
 
     def prepare(self):
-        config_parser = ConfigParser({})
-        self._converter = PdfConverter(create_model_dict(), config=config_parser.generate_config_dict())
+        self._converter = MarkItDown(enable_plugins=False)
 
-    def __call__(self, content: bytes) -> str:
-        with tempfile.NamedTemporaryFile(delete=True, suffix=".pdf") as temp_file:
+    def __call__(self, content: bytes, filename: str) -> str:
+        suffix = os.path.splitext(filename)[1] if os.path.splitext(filename)[1] else ""
+        with tempfile.NamedTemporaryFile(delete=True, suffix=suffix) as temp_file:
             temp_file.write(content)
             temp_file.flush()
-            text, _, _ = text_from_rendered(self._converter(temp_file.name))
+            text = self._converter.convert(temp_file.name).text_content
             return text
-
 
 @cocoindex.flow_def(name="PatientIntakeExtraction")
 def patient_intake_extraction_flow(flow_builder: cocoindex.FlowBuilder, data_scope: cocoindex.DataScope):
@@ -112,7 +108,8 @@ def patient_intake_extraction_flow(flow_builder: cocoindex.FlowBuilder, data_sco
     patients_index = data_scope.add_collector()
 
     with data_scope["documents"].row() as doc:
-        doc["markdown"] = doc["content"].transform(PdfToMarkdown())
+
+        doc["markdown"] = doc["content"].transform(ToMarkdown(), filename = doc["filename"])
         doc["patient_info"] = doc["markdown"].transform(
             cocoindex.functions.ExtractByLlm(
                 llm_spec=cocoindex.LlmSpec(

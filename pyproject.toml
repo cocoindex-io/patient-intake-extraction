@@ -3,4 +3,4 @@ name = "patient-intake-extraction"
 version = "0.1.0"
 description = "Extract structured information from patient intake forms using LLM."
 requires-python = ">=3.10"
-dependencies = ["cocoindex>=0.1.11", "python-dotenv>=1.0.1"]
+dependencies = ["cocoindex>=0.1.11", "python-dotenv>=1.0.1", "markitdown[all]>=0.1.0a1"]

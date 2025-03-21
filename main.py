@@ -1,5 +1,6 @@
 import tempfile
 import dataclasses
+import os
 
 from dotenv import load_dotenv
 from marker.converters.pdf import PdfConverter
@@ -94,13 +95,19 @@ class PdfToMarkdownExecutor:
             return text
 
 
-
 @cocoindex.flow_def(name="PatientIntakeExtraction")
 def patient_intake_extraction_flow(flow_builder: cocoindex.FlowBuilder, data_scope: cocoindex.DataScope):
     """
     Define a flow that extracts patient information from intake forms.
     """
-    data_scope["documents"] = flow_builder.add_source(cocoindex.sources.LocalFile(path="files", binary=True))
+    credential_path = os.environ["GOOGLE_SERVICE_ACCOUNT_CREDENTIAL"]
+    root_folder_ids = os.environ["GOOGLE_DRIVE_ROOT_FOLDER_IDS"].split(",")
+    
+    data_scope["documents"] = flow_builder.add_source(
+        cocoindex.sources.GoogleDrive(
+            service_account_credential_path=credential_path,
+            root_folder_ids=root_folder_ids,
+            binary=True))
 
     patients_index = data_scope.add_collector()
 

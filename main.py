@@ -50,6 +50,7 @@ class Address:
 @dataclasses.dataclass
 class Patient:
     name: str
+    """Date of birth in YYYY-MM-DD format."""
     dob: str
     gender: str
     address: Address
@@ -67,6 +68,7 @@ class Patient:
     occupation: str | None
     pharmacy: Contact | None
     consent_given: bool
+    """Date when consent was given, in YYYY-MM-DD format if available."""
     consent_date: str | None
 
 
@@ -113,12 +115,7 @@ def patient_intake_extraction_flow(flow_builder: cocoindex.FlowBuilder, data_sco
         doc["patient_info"] = doc["markdown"].transform(
             cocoindex.functions.ExtractByLlm(
                 llm_spec=cocoindex.LlmSpec(
-                     api_type=cocoindex.LlmApiType.OLLAMA,
-                     model="llama3.2"
-                ),
-                # Replace by this spec below, to use OpenAI API model instead of ollama
-                #   llm_spec=cocoindex.LlmSpec(
-                #       api_type=cocoindex.LlmApiType.OPENAI, model="gpt-4o"),
+                    api_type=cocoindex.LlmApiType.OPENAI, model="gpt-4o"),
                 output_type=Patient,
                 instruction="Please extract patient information from the intake form."))
         patients_index.collect(

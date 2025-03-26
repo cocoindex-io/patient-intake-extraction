@@ -1,0 +1,50 @@
+---
+key: 1n2m3VHq2_kP762ECyPH9Z5Tk44eu3yRZ
+exports:
+  patients:
+    - filename: Patient_Intake_Form_David_Artificial.docx
+      patient_info:
+        name: David Thompson
+        dob: 1980-05-10
+        gender: Male
+        address:
+          street: 789 Pine Street
+          city: Austin
+          state: TX
+          zip_code: "73301"
+        phone: (555) 321-7890
+        email: david.thompson@email.com
+        preferred_contact_method: Phone
+        emergency_contact:
+          name: Sarah Thompson
+          phone: (555) 654-0987
+          relationship: Wife
+        insurance:
+          provider: HealthFirst Insurance
+          policy_number: "555667788"
+          group_number: "11223"
+          policyholder_name: David Thompson
+          relationship_to_patient: Self
+        reason_for_visit: Knee pain
+        symptoms_duration: 4 months
+        past_conditions:
+          - name: Hypertension
+            diagnosed: true
+        current_medications:
+          - name: Lisinopril
+            dosage: 10mg daily
+        allergies: []
+        surgeries:
+          - name: ACL Surgery
+            date: "2018"
+        occupation: Mechanical Engineer
+        pharmacy:
+          name: CityMed Pharmacy
+          phone: (555) 222-3333
+          address:
+            street: 456 Health Blvd
+            city: Austin
+            state: TX
+            zip_code: "73301"
+        consent_given: true
+        consent_date: 2025-03-25

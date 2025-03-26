@@ -1,0 +1,51 @@
+---
+key: 1jBOjhkSnXnBS8poGn_G7zcpD-qO_Ffgi
+exports:
+  patients:
+    - filename: Patient_Intake_Form_Emily_Artificial.pdf
+      patient_info:
+        name: Emily Carter
+        dob: 1992-07-22
+        gender: Female
+        address:
+          street: 456 Oak Avenue
+          city: Denver
+          state: CO
+          zip_code: "80203"
+        phone: (555) 678-9012
+        email: emily.carter@email.com
+        preferred_contact_method: Email
+        emergency_contact:
+          name: Michael Carter
+          phone: (555) 234-5678
+          relationship: Brother
+        insurance:
+          provider: XYZ Health Plan
+          policy_number: "987654321"
+          group_number: "54321"
+          policyholder_name: Emily Carter
+          relationship_to_patient: Self
+        reason_for_visit: Severe migraines
+        symptoms_duration: 6 months
+        past_conditions:
+          - name: Asthma
+            diagnosed: true
+        current_medications:
+          - name: Albuterol inhaler
+            dosage: ""
+        allergies:
+          - name: Penicillin
+        surgeries:
+          - name: Tonsillectomy
+            date: "2000"
+        occupation: Graphic Designer
+        pharmacy:
+          name: Greenfield Pharmacy
+          phone: (555) 876-5432
+          address:
+            street: 789 Maple Road
+            city: Denver
+            state: CO
+            zip_code: "80203"
+        consent_given: true
+        consent_date: 2025-03-25

@@ -1,3 +1,4 @@
+import datetime
 import tempfile
 import dataclasses
 import os
@@ -12,6 +13,19 @@ class Contact:
     name: str
     phone: str
     relationship: str
+
+@dataclasses.dataclass
+class Address:
+    street: str
+    city: str
+    state: str
+    zip_code: str
+
+@dataclasses.dataclass
+class Pharmacy:
+    name: str
+    phone: str
+    address: Address
 
 @dataclasses.dataclass
 class Insurance:
@@ -41,17 +55,9 @@ class Surgery:
     date: str
 
 @dataclasses.dataclass
-class Address:
-    street: str
-    city: str
-    state: str
-    zip_code: str
-
-@dataclasses.dataclass
 class Patient:
     name: str
-    """Date of birth in YYYY-MM-DD format."""
-    dob: str
+    dob: datetime.date
     gender: str
     address: Address
     phone: str
@@ -66,10 +72,9 @@ class Patient:
     allergies: cocoindex.typing.List[Allergy]
     surgeries: cocoindex.typing.List[Surgery]
     occupation: str | None
-    pharmacy: Contact | None
+    pharmacy: Pharmacy | None
     consent_given: bool
-    """Date when consent was given, in YYYY-MM-DD format if available."""
-    consent_date: str | None
+    consent_date: datetime.date
 
 
 class ToMarkdown(cocoindex.op.FunctionSpec):

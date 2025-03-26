@@ -5,6 +5,7 @@ import os
 
 from dotenv import load_dotenv
 from markitdown import MarkItDown
+from openai import OpenAI
 
 import cocoindex
 
@@ -88,7 +89,8 @@ class ToMarkdownExecutor:
     _converter: MarkItDown
 
     def prepare(self):
-        self._converter = MarkItDown(enable_plugins=False)
+        client = OpenAI()
+        self._converter = MarkItDown(llm_client=client, llm_model="gpt-4o")
 
     def __call__(self, content: bytes, filename: str) -> str:
         suffix = os.path.splitext(filename)[1] if os.path.splitext(filename)[1] else ""
@@ -120,7 +122,7 @@ def patient_intake_extraction_flow(flow_builder: cocoindex.FlowBuilder, data_sco
         doc["patient_info"] = doc["markdown"].transform(
             cocoindex.functions.ExtractByLlm(
                 llm_spec=cocoindex.LlmSpec(
-                    api_type=cocoindex.LlmApiType.OPENAI, model="gpt-4o"),
+                    api_type=cocoindex.LlmApiType.OPENAI, model="gpt-4.5-preview"),
                 output_type=Patient,
                 instruction="Please extract patient information from the intake form."))
         patients_index.collect(

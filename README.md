@@ -1,6 +1,7 @@
 <p align="center">
-    <img src="![Image](https://github.com/user-attachments/assets/0f9cef79-3e44-4b0e-8f8e-a2a9ada90325)" alt="CocoIndex Patient Form Extraction">
+    <img src="![Image]([https://github.com/user-attachments/assets/0f9cef79-3e44-4b0e-8f8e-a2a9ada90325](https://github.com/user-attachments/assets/4ce223b0-6a57-434b-8528-43a9f2b99775))" alt="CocoIndex Patient Form Extraction">
 </p>
+
 
 This repo shows how to use OpenAI API to extract structured data from patient intake forms with different formats, like PDF, Docx, etc. from Google Drive.
 

@@ -1,0 +1,32 @@
+---
+key: 1NqSz-BUk55rjdcu-AoOsMX6Ho9pjc4TeqWKicl7P0fw
+exports:
+  patients:
+    - filename: Patient_Intake_From_Jane
+      patient_info:
+        name: Jane Doe
+        dob: 1985-01-16
+        gender: Female
+        address:
+          street: 123 Main St
+          city: Springfield
+          state: IL
+          zip_code: "62701"
+        phone: ""
+        email: ""
+        preferred_contact_method: ""
+        emergency_contact:
+          name: ""
+          phone: ""
+          relationship: ""
+        insurance: ~
+        reason_for_visit: ""
+        symptoms_duration: ""
+        past_conditions: []
+        current_medications: []
+        allergies: []
+        surgeries: []
+        occupation: ~
+        pharmacy: ~
+        consent_given: false
+        consent_date: ~

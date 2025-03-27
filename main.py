@@ -1,9 +1,11 @@
+import datetime
 import tempfile
 import dataclasses
 import os
 
 from dotenv import load_dotenv
 from markitdown import MarkItDown
+from openai import OpenAI
 
 import cocoindex
 
@@ -12,6 +14,19 @@ class Contact:
     name: str
     phone: str
     relationship: str
+
+@dataclasses.dataclass
+class Address:
+    street: str
+    city: str
+    state: str
+    zip_code: str
+
+@dataclasses.dataclass
+class Pharmacy:
+    name: str
+    phone: str
+    address: Address
 
 @dataclasses.dataclass
 class Insurance:
@@ -41,16 +56,9 @@ class Surgery:
     date: str
 
 @dataclasses.dataclass
-class Address:
-    street: str
-    city: str
-    state: str
-    zip_code: str
-
-@dataclasses.dataclass
 class Patient:
     name: str
-    dob: str
+    dob: datetime.date
     gender: str
     address: Address
     phone: str
@@ -60,14 +68,14 @@ class Patient:
     insurance: Insurance | None
     reason_for_visit: str
     symptoms_duration: str
-    past_conditions: cocoindex.typing.List[Condition]
-    current_medications: cocoindex.typing.List[Medication]
-    allergies: cocoindex.typing.List[Allergy]
-    surgeries: cocoindex.typing.List[Surgery]
+    past_conditions: list[Condition]
+    current_medications: list[Medication]
+    allergies: list[Allergy]
+    surgeries: list[Surgery]
     occupation: str | None
-    pharmacy: Contact | None
+    pharmacy: Pharmacy | None
     consent_given: bool
-    consent_date: str | None
+    consent_date: datetime.date | None
 
 
 class ToMarkdown(cocoindex.op.FunctionSpec):
@@ -81,7 +89,8 @@ class ToMarkdownExecutor:
     _converter: MarkItDown
 
     def prepare(self):
-        self._converter = MarkItDown(enable_plugins=False)
+        client = OpenAI()
+        self._converter = MarkItDown(llm_client=client, llm_model="gpt-4o")
 
     def __call__(self, content: bytes, filename: str) -> str:
         suffix = os.path.splitext(filename)[1] if os.path.splitext(filename)[1] else ""
@@ -113,12 +122,7 @@ def patient_intake_extraction_flow(flow_builder: cocoindex.FlowBuilder, data_sco
         doc["patient_info"] = doc["markdown"].transform(
             cocoindex.functions.ExtractByLlm(
                 llm_spec=cocoindex.LlmSpec(
-                     api_type=cocoindex.LlmApiType.OLLAMA,
-                     model="llama3.2"
-                ),
-                # Replace by this spec below, to use OpenAI API model instead of ollama
-                #   llm_spec=cocoindex.LlmSpec(
-                #       api_type=cocoindex.LlmApiType.OPENAI, model="gpt-4o"),
+                    api_type=cocoindex.LlmApiType.OPENAI, model="gpt-4o"),
                 output_type=Patient,
                 instruction="Please extract patient information from the intake form."))
         patients_index.collect(

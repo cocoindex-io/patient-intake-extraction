@@ -1,9 +1,11 @@
 <p align="center">
-    <img src="https://cocoindex.io/images/github.svg" alt="CocoIndex">
+    <img src="![Image](https://github.com/user-attachments/assets/0f9cef79-3e44-4b0e-8f8e-a2a9ada90325)" alt="CocoIndex Patient Form Extraction">
 </p>
 
+This repo shows how to use OpenAI API to extract structured data from patient intake forms with different formats, like PDF, Docx, etc. from Google Drive.
 
-⭐ Please give [Cocoindex on Github](https://github.com/cocoindex-io/cocoindex) a star to support us if you like our work. Thank you so much with a warm coconut hug 🥥🤗. [![GitHub](https://img.shields.io/github/stars/cocoindex-io/cocoindex?color=5B5BD6)](https://github.com/cocoindex-io/cocoindex)
+❤️ Please give [Cocoindex on Github](https://github.com/cocoindex-io/cocoindex) a star ⭐ to support us if you like our work. Thank you so much with a warm coconut hug 🥥🤗. [![GitHub](https://img.shields.io/github/stars/cocoindex-io/cocoindex?color=5B5BD6)](https://github.com/cocoindex-io/cocoindex)
+
 
 
 ## Prerequisite

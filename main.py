@@ -122,7 +122,7 @@ def patient_intake_extraction_flow(flow_builder: cocoindex.FlowBuilder, data_sco
         doc["patient_info"] = doc["markdown"].transform(
             cocoindex.functions.ExtractByLlm(
                 llm_spec=cocoindex.LlmSpec(
-                    api_type=cocoindex.LlmApiType.OPENAI, model="gpt-4.5-preview"),
+                    api_type=cocoindex.LlmApiType.OPENAI, model="gpt-4o"),
                 output_type=Patient,
                 instruction="Please extract patient information from the intake form."))
         patients_index.collect(

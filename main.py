@@ -68,10 +68,10 @@ class Patient:
     insurance: Insurance | None
     reason_for_visit: str
     symptoms_duration: str
-    past_conditions: cocoindex.typing.List[Condition]
-    current_medications: cocoindex.typing.List[Medication]
-    allergies: cocoindex.typing.List[Allergy]
-    surgeries: cocoindex.typing.List[Surgery]
+    past_conditions: list[Condition]
+    current_medications: list[Medication]
+    allergies: list[Allergy]
+    surgeries: list[Surgery]
     occupation: str | None
     pharmacy: Pharmacy | None
     consent_given: bool

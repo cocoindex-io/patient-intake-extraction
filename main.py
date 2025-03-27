@@ -93,7 +93,7 @@ class ToMarkdownExecutor:
         self._converter = MarkItDown(llm_client=client, llm_model="gpt-4o")
 
     def __call__(self, content: bytes, filename: str) -> str:
-        suffix = os.path.splitext(filename)[1] if os.path.splitext(filename)[1] else ""
+        suffix = os.path.splitext(filename)[1]
         with tempfile.NamedTemporaryFile(delete=True, suffix=suffix) as temp_file:
             temp_file.write(content)
             temp_file.flush()

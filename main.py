@@ -75,7 +75,7 @@ class Patient:
     occupation: str | None
     pharmacy: Pharmacy | None
     consent_given: bool
-    consent_date: datetime.date
+    consent_date: datetime.date | None
 
 
 class ToMarkdown(cocoindex.op.FunctionSpec):

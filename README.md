@@ -24,13 +24,13 @@ export COCOINDEX_DATABASE_URL="postgresql://cocoindex:cocoindex@localhost:5432/c
 Setup index:
 
 ```bash
-python main.py cocoindex setup
+cocoindex setup main.py
 ```
 
 Update index:
 
 ```bash
-python main.py cocoindex update
+cocoindex update main.py
 ```
 
 Run query:
@@ -41,7 +41,7 @@ python main.py
 
 Run with CocoInsight:
 ```bash
-python3 main.py cocoindex server -c https://cocoindex.io
+cocoindex server -ci main.py
 ```
 
 View results at https://cocoindex.io/cocoinsight

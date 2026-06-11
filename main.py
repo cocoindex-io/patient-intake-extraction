@@ -1,145 +1,92 @@
-import datetime
-import tempfile
-import dataclasses
-import os
+"""
+Patient intake extraction (v1) — DSPy + Gemini vision.
 
-from dotenv import load_dotenv
-from markitdown import MarkItDown
-from openai import OpenAI
+Walk a folder of patient intake PDFs, render each page to an image, extract
+structured patient information with a vision LLM via DSPy, and write one JSON
+file per form. Re-runs only reprocess forms that actually changed.
 
-import cocoindex
+Run:
+    cocoindex update main.py
+"""
 
-@dataclasses.dataclass
-class Contact:
-    name: str
-    phone: str
-    relationship: str
+from __future__ import annotations
 
-@dataclasses.dataclass
-class Address:
-    street: str
-    city: str
-    state: str
-    zip_code: str
+import pathlib
 
-@dataclasses.dataclass
-class Pharmacy:
-    name: str
-    phone: str
-    address: Address
+import dspy
+import pymupdf
 
-@dataclasses.dataclass
-class Insurance:
-    provider: str
-    policy_number: str
-    group_number: str | None
-    policyholder_name: str
-    relationship_to_patient: str
+import cocoindex as coco
+from cocoindex.connectors import localfs
+from cocoindex.resources.file import FileLike, PatternFilePathMatcher
 
-@dataclasses.dataclass
-class Condition:
-    name: str
-    diagnosed: bool
-
-@dataclasses.dataclass
-class Medication:
-    name: str
-    dosage: str
-
-@dataclasses.dataclass
-class Allergy:
-    name: str
-
-@dataclasses.dataclass
-class Surgery:
-    name: str
-    date: str
-
-@dataclasses.dataclass
-class Patient:
-    name: str
-    dob: datetime.date
-    gender: str
-    address: Address
-    phone: str
-    email: str
-    preferred_contact_method: str
-    emergency_contact: Contact
-    insurance: Insurance | None
-    reason_for_visit: str
-    symptoms_duration: str
-    past_conditions: list[Condition]
-    current_medications: list[Medication]
-    allergies: list[Allergy]
-    surgeries: list[Surgery]
-    occupation: str | None
-    pharmacy: Pharmacy | None
-    consent_given: bool
-    consent_date: datetime.date | None
+from models import Patient
 
 
-class ToMarkdown(cocoindex.op.FunctionSpec):
-    """Convert a document to markdown."""
+class PatientExtractionSignature(dspy.Signature):
+    """Extract structured patient information from a medical intake form image."""
 
-@cocoindex.op.executor_class(gpu=True, cache=True, behavior_version=1)
-class ToMarkdownExecutor:
-    """Executor for ToMarkdown."""
-
-    spec: ToMarkdown
-    _converter: MarkItDown
-
-    def prepare(self):
-        client = OpenAI()
-        self._converter = MarkItDown(llm_client=client, llm_model="gpt-4o")
-
-    def __call__(self, content: bytes, filename: str) -> str:
-        suffix = os.path.splitext(filename)[1]
-        with tempfile.NamedTemporaryFile(delete=True, suffix=suffix) as temp_file:
-            temp_file.write(content)
-            temp_file.flush()
-            text = self._converter.convert(temp_file.name).text_content
-            return text
-
-@cocoindex.flow_def(name="PatientIntakeExtraction")
-def patient_intake_extraction_flow(flow_builder: cocoindex.FlowBuilder, data_scope: cocoindex.DataScope):
-    """
-    Define a flow that extracts patient information from intake forms.
-    """
-    credential_path = os.environ["GOOGLE_SERVICE_ACCOUNT_CREDENTIAL"]
-    root_folder_ids = os.environ["GOOGLE_DRIVE_ROOT_FOLDER_IDS"].split(",")
-    
-    data_scope["documents"] = flow_builder.add_source(
-        cocoindex.sources.GoogleDrive(
-            service_account_credential_path=credential_path,
-            root_folder_ids=root_folder_ids,
-            binary=True))
-
-    patients_index = data_scope.add_collector()
-
-    with data_scope["documents"].row() as doc:
-
-        doc["markdown"] = doc["content"].transform(ToMarkdown(), filename = doc["filename"])
-        doc["patient_info"] = doc["markdown"].transform(
-            cocoindex.functions.ExtractByLlm(
-                llm_spec=cocoindex.LlmSpec(
-                    api_type=cocoindex.LlmApiType.OPENAI, model="gpt-4o"),
-                output_type=Patient,
-                instruction="Please extract patient information from the intake form."))
-        patients_index.collect(
-            filename=doc["filename"],
-            patient_info=doc["patient_info"],
-        )
-
-    patients_index.export(
-        "patients",
-        cocoindex.storages.Postgres(table_name="patients_info"),
-        primary_key_fields=["filename"],
+    form_images: list[dspy.Image] = dspy.InputField(
+        desc="Images of the patient intake form pages"
+    )
+    patient: Patient = dspy.OutputField(
+        desc="Extracted patient information with all available fields filled"
     )
 
-@cocoindex.main_fn()
-def _run():
-    pass
 
-if __name__ == "__main__":
-    load_dotenv(override=True)
-    _run()
+class PatientExtractor(dspy.Module):
+    """DSPy module for extracting patient information from intake form images."""
+
+    def __init__(self) -> None:
+        super().__init__()
+        self.extract = dspy.ChainOfThought(PatientExtractionSignature)
+
+    def forward(self, form_images: list[dspy.Image]) -> Patient:
+        result = self.extract(form_images=form_images)
+        return result.patient
+
+
+@coco.fn
+def extract_patient(pdf_content: bytes) -> Patient:
+    pdf_doc = pymupdf.open(stream=pdf_content, filetype="pdf")
+
+    form_images = []
+    for page in pdf_doc:
+        pix = page.get_pixmap(matrix=pymupdf.Matrix(2, 2))
+        form_images.append(dspy.Image(pix.tobytes("png")))
+
+    pdf_doc.close()
+
+    return PatientExtractor()(form_images=form_images)
+
+
+@coco.fn(memo=True)
+async def process_patient_form(file: FileLike, outdir: pathlib.Path) -> None:
+    content = await file.read()
+    patient_info = extract_patient(content)
+    output_filename = file.file_path.path.stem + ".json"
+    localfs.declare_file(
+        outdir / output_filename,
+        patient_info.model_dump_json(indent=2),
+        create_parent_dirs=True,
+    )
+
+
+@coco.fn
+async def app_main(sourcedir: pathlib.Path, outdir: pathlib.Path) -> None:
+    files = localfs.walk_dir(
+        sourcedir,
+        path_matcher=PatternFilePathMatcher(included_patterns=["**/*.pdf"]),
+    )
+    await coco.mount_each(process_patient_form, files.items(), outdir)
+
+
+lm = dspy.LM("gemini/gemini-2.5-flash")
+dspy.configure(lm=lm)
+
+app = coco.App(
+    coco.AppConfig(name="PatientIntakeExtraction"),
+    app_main,
+    sourcedir=pathlib.Path("./data/patient_forms"),
+    outdir=pathlib.Path("./output_patients"),
+)

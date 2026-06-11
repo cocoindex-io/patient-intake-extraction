@@ -1,47 +1,74 @@
 ![Structured Data From Patient Intake Forms](https://github.com/user-attachments/assets/1f6afb69-d26d-4a08-8774-13982d6aec1e)
 
-This repo shows how to use OpenAI API to extract structured data from patient intake forms with different formats, like PDF, Docx, etc. from Google Drive.
+# 🥥 Patient Intake Extraction with CocoIndex
 
-❤️ Please give [Cocoindex on Github](https://github.com/cocoindex-io/cocoindex) a star ⭐ to support us if you like our work. Thank you so much with a warm coconut hug 🥥🤗. [![GitHub](https://img.shields.io/github/stars/cocoindex-io/cocoindex?color=5B5BD6)](https://github.com/cocoindex-io/cocoindex)
+Extract structured data from patient intake forms (PDF) using [CocoIndex](https://cocoindex.io) v1 and [DSPy](https://github.com/stanfordnlp/dspy) with a Gemini vision model. Each form is rendered to images, passed to the LLM, and written out as a validated JSON record — incrementally, so re-runs only reprocess forms that actually changed.
 
+❤️ Please give [CocoIndex on GitHub](https://github.com/cocoindex-io/cocoindex) a star ⭐ to support us. A warm coconut hug 🥥🤗. [![GitHub](https://img.shields.io/github/stars/cocoindex-io/cocoindex?color=5B5BD6)](https://github.com/cocoindex-io/cocoindex)
 
+## What it does
 
-## Prerequisite
-- [Install Postgres](https://cocoindex.io/docs/getting_started/installation#-install-postgres) if you don't have one.
-
-- Install CocoIndex
-```bash
-pip install -U cocoindex
+```
+data/patient_forms/*.pdf  ──▶  pages → images  ──▶  DSPy + Gemini  ──▶  output_patients/*.json
 ```
 
--  Make sure you have specify the database URL by environment variable:
-```
-export COCOINDEX_DATABASE_URL="postgresql://cocoindex:cocoindex@localhost:5432/cocoindex"
-```
+- **Pydantic models** (`models.py`) define the target schema — type-safe, validated `Patient` records.
+- **DSPy module** (`main.py`) extracts directly from page images via `ChainOfThought` with vision — no intermediate text/markdown step.
+- **CocoIndex v1 app** (`main.py`) processes each form as an independent component and writes JSON, recomputing only what changed.
+
+## Prerequisites
+
+- **Python 3.11+**
+- A **Gemini API key** — no Postgres, no Docker.
 
 ## Run
 
-Setup index:
+**1. Install dependencies** (sample PDFs are already in `data/patient_forms/`):
 
 ```bash
-cocoindex setup main.py
+pip install -e .
 ```
 
-Update index:
+**2. Set your API key:**
+
+```bash
+echo "GEMINI_API_KEY=your_api_key_here" > .env
+```
+
+**3. Extract:**
 
 ```bash
 cocoindex update main.py
 ```
 
-Run query:
+This reads each PDF in `data/patient_forms/`, extracts the patient record, and writes JSON to `output_patients/`:
 
 ```bash
-python main.py
+ls output_patients/
+# Patient_Intake_Form_David_Artificial.json
+# Patient_Intake_Form_Emily_Artificial.json
+# Patient_Intake_Form_Joe_Artificial.json
+# Patient_Intake_From_Jane_Artificial.json
 ```
 
-Run with CocoInsight:
+## Incremental processing
+
+Re-running never redoes work that's already done — `process_patient_form` is memoized by file content:
+
+```bash
+cocoindex update main.py        # ⚡ unchanged forms are skipped
+```
+
+Add, replace, or remove a PDF and re-run — only the affected form is reprocessed, and a removed PDF's JSON is cleaned up automatically.
+
+## Explore with CocoInsight
+
 ```bash
 cocoindex server -ci main.py
 ```
 
-View results at https://cocoindex.io/cocoinsight
+Then open [https://cocoindex.io/cocoinsight](https://cocoindex.io/cocoinsight).
+
+---
+
+The sample forms under `data/` are purely artificial and for testing only.

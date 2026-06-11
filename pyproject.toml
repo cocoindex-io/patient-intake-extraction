@@ -1,11 +1,16 @@
 [project]
 name = "patient-intake-extraction"
 version = "0.1.0"
-description = "Extract structured information from patient intake forms using LLM."
-requires-python = ">=3.10"
+description = "CocoIndex v1 example: extract structured data from patient intake forms with DSPy + a vision LLM."
+requires-python = ">=3.11"
 dependencies = [
-    "cocoindex>=0.1.45",
+    "cocoindex>=1.0.7",
+    "dspy-ai>=3.0.4",
+    "pillow>=10.0.0",
+    "pydantic>=2.12.5",
+    "pymupdf>=1.26.5",
     "python-dotenv>=1.0.1",
-    "markitdown>=0.1.1",
-    "openai>=1.68.2"
 ]
+
+[tool.setuptools]
+packages = []

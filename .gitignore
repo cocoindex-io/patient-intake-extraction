@@ -1,7 +1,8 @@
 .DS_Store
-
-# Python package metadata
+output_patients/
+cocoindex.db/
+__pycache__/
+*.pyc
+.venv/
 *.egg-info/
-*.egg-info/**
-*.egg
 .env

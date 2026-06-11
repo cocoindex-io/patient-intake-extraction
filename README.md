@@ -29,11 +29,14 @@ data/patient_forms/*.pdf  ──▶  pages → images  ──▶  DSPy + Gemini 
 pip install -e .
 ```
 
-**2. Set your API key:**
+**2. Set your API key** — copy the template and add your Gemini key:
 
 ```bash
-echo "GEMINI_API_KEY=your_api_key_here" > .env
+cp .env.example .env
+# then edit .env and set GEMINI_API_KEY=your_api_key_here
 ```
+
+The template also sets `COCOINDEX_DB=./cocoindex.db` (the local engine state path), which is required.
 
 **3. Extract:**
 
@@ -61,13 +64,15 @@ cocoindex update main.py        # ⚡ unchanged forms are skipped
 
 Add, replace, or remove a PDF and re-run — only the affected form is reprocessed, and a removed PDF's JSON is cleaned up automatically.
 
-## Explore with CocoInsight
+## How it works
 
-```bash
-cocoindex server -ci main.py
-```
+The pipeline lives in [`main.py`](./main.py):
 
-Then open [https://cocoindex.io/cocoinsight](https://cocoindex.io/cocoinsight).
+- `extract_patient` — a `@coco.fn` that renders each PDF page to an image (pymupdf) and runs a DSPy `ChainOfThought` vision module to return a validated `Patient` ([`models.py`](./models.py)).
+- `process_patient_form` — a memoized `@coco.fn` that reads a file, extracts, and declares the JSON output.
+- `app_main` — walks `data/patient_forms/` and mounts one component per PDF.
+
+Each form is processed independently and memoized by content, so re-runs only touch what changed.
 
 ---
 
